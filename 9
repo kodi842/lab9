@@ -1,1 +1,90 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <queue>
+
+// Функция для создания матрицы смежности
+int** createG(int size) {
+    int **G = (int**)malloc(size * sizeof(int*));
+    for (int i = 0; i < size; i++) {
+        G[i] = (int*)malloc(size * sizeof(int));
+        for (int j = 0; j < size; j++) {
+            if (i == j) {
+                G[i][j] = 0;
+            } else if (j > i) {
+                G[i][j] = rand() % 2;
+                G[j][i] = G[i][j];  // граф неориентированный
+            }
+        }
+    }
+    return G;
+}
+
+// Функция для вывода матрицы смежности
+void printG(int** matrix, int n) {
+    printf("Матрица смежности:\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            printf("%d ", matrix[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+// Алгоритм поиска в ширину (BFS)
+void BFSD(int** G, int v, int size) {
+    std::queue<int> Q;
+    int* DIST = (int*)malloc(size * sizeof(int));
+    for (int i = 0; i < size; i++) {
+        DIST[i] = -1;  // помечаем все вершины как "не посещенные"
+    }
+
+    Q.push(v);
+    DIST[v] = 0;
+
+    while (!Q.empty()) {
+        int curr = Q.front();
+        Q.pop();
+
+        for (int i = 0; i < size; i++) {
+            if (G[curr][i] == 1 && DIST[i] == -1) {
+                Q.push(i);
+                DIST[i] = DIST[curr] + 1;
+            }
+        }
+    }
+
+    // Вывод расстояний
+    printf("Расстояния от вершины %d:\n", v);
+    for (int i = 0; i < size; i++) {
+        printf("Вершина %d: %d\n", i, DIST[i]);
+    }
+
+    free(DIST);
+}
+
+int main() {
+    srand(time(0));
+
+    int n;
+    printf("Введите размер матрицы: ");
+    scanf("%d", &n);
+
+    int** matrix = createG(n);
+    printG(matrix, n);
+
+    int start_node;
+    printf("Введите начальную вершину для обхода (от 0 до %d): ", n - 1);
+    scanf("%d", &start_node);
+
+    BFSD(matrix, start_node, n);
+
+    // Освобождение памяти
+    for (int i = 0; i < n; i++) {
+        free(matrix[i]);
+    }
+    free(matrix);
+
+    return 0;
+}
 
